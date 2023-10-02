@@ -1,5 +1,5 @@
-import 'package:chat/data/db/sqflite.dart';
-import 'package:chat/data/models/db_model.dart';
+import 'package:chat/data/db/notif_sqflite.dart';
+import 'package:chat/data/models/news_model.dart';
 import 'package:chat/providers/db_read_provider.dart';
 import 'package:chat/service/notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,14 +7,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
-Future<void> initFirebase(BuildContext context) async {
+Future<void> initFirebaseNews(BuildContext context) async {
   await Firebase.initializeApp();
   String? fcmToken = await FirebaseMessaging.instance.getToken();
   debugPrint("FCM USER TOKEN: $fcmToken");
   // await FirebaseMessaging.instance.subscribeToTopic("news");
 
-  /// Update the iOS foreground notification presentation options to allow
-  /// heads up notifications.
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
     badge: true,
@@ -24,29 +22,41 @@ Future<void> initFirebase(BuildContext context) async {
   // FOREGROUND MESSAGE HANDLING.
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     debugPrint(
-        "NOTIFICATION FOREGROUND MODE: ${message.data["news_image"]} va ${message.notification!.title} in foreground");
+        "NOTIFICATION FOREGROUND MODE: ${message.data["data"]} va ${message.notification!.title} in foreground");
     LocalNotificationService.instance.showFlutterNotification(message);
-    LocalDatabase.insertMessage(DBModelSql(name: message.notification!.title!, message: message.notification!.body!, createdAt: DateTime.now().toString()));
+    NotLocalDatabase.insertNotification(
+      NewsModel(
+        title: message.data['title'],
+        body: message.data['body'],
+        createdAt: message.data['createdAt'],
+      ),
+    );
     if (context.mounted) context.read<ReadProvider>().readMessages();
   });
 
   // BACkGROUND MESSAGE HANDLING
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandlerNews);
 
   // FROM TERMINATED MODE
 
   handleMessage(RemoteMessage message) {
     debugPrint(
-        "NOTIFICATION FROM TERMINATED MODE: ${message.data["news_image"]} va ${message.notification!.title} in terminated");
+        "NOTIFICATION FROM TERMINATED MODE: ${message.data["title"]} va ${message.notification!.title} in terminated");
     LocalNotificationService.instance.showFlutterNotification(message);
   }
 
   RemoteMessage? remoteMessage =
-  await FirebaseMessaging.instance.getInitialMessage();
+      await FirebaseMessaging.instance.getInitialMessage();
 
   if (remoteMessage != null) {
     handleMessage(remoteMessage);
-    LocalDatabase.insertMessage(DBModelSql(name: remoteMessage.notification!.title!, message: remoteMessage.notification!.body!, createdAt: DateTime.now().toString()));
+    NotLocalDatabase.insertNotification(
+      NewsModel(
+        title: remoteMessage.data['title'],
+        body: remoteMessage.data['body'],
+        createdAt: remoteMessage.data['createdAt'],
+      ),
+    );
 
     if (context.mounted) context.read<ReadProvider>().readMessages();
   }
@@ -54,9 +64,15 @@ Future<void> initFirebase(BuildContext context) async {
   FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
 }
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+Future<void> _firebaseMessagingBackgroundHandlerNews(RemoteMessage message) async {
   await Firebase.initializeApp();
-  LocalDatabase.insertMessage(DBModelSql(name: message.notification!.title!, message: message.notification!.body!, createdAt: DateTime.now().toString()));
+  NotLocalDatabase.insertNotification(
+    NewsModel(
+      title: message.data['title'],
+      body: message.data['body'],
+      createdAt: message.data['createdAt'],
+    ),
+  );
   debugPrint(
-      "NOTIFICATION BACKGROUND MODE: ${message.data["news_image"]} va ${message.notification!.title} in background");
+      "NOTIFICATION BACKGROUND MODE: ${message.data["title"]} va ${message.notification!.title} in background");
 }

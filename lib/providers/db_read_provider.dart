@@ -16,6 +16,7 @@ class ReadProvider with ChangeNotifier{
 
   deleteMessage(int id)async{
     await LocalDatabase.deleteMessage(id);
+    readMessages();
     notifyListeners();
   }
 

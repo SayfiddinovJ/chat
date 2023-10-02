@@ -1,4 +1,4 @@
-import 'package:chat/ui/auth/app/app.dart';
+import 'package:chat/ui/home/home_screen.dart';
 import 'package:flutter/material.dart';
 
 class SplashPage extends StatefulWidget {
@@ -17,7 +17,7 @@ class _SplashPageState extends State<SplashPage> {
         context,
         MaterialPageRoute(
           builder: (context) {
-            return const App();
+            return const HomeScreen();
           },
         ),
       );

@@ -52,7 +52,6 @@ class ChatProvider with ChangeNotifier {
       hideLoading(dialogContext: context);
       clean();
     }
-
     if (universalData.error.isEmpty) {
       if (context.mounted) {
         showMessage(context, universalData.data as String);
@@ -86,12 +85,31 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  Stream<List<ChatModel>> getMessage() =>
-      FirebaseFirestore.instance.collection("chat1").orderBy('createdAt').snapshots().map(
-            (event1) => event1.docs
-                .map((doc) => ChatModel.fromJson(doc.data()))
-                .toList(),
-          );
+  Future<void> deleteAll({required BuildContext context}) async {
+    showLoading(context: context);
+    UniversalData universalData = await ChatService.deleteAll();
+    if (context.mounted) {
+      hideLoading(dialogContext: context);
+    }
+    if (universalData.error.isEmpty) {
+      if (context.mounted) {
+        showMessage(context, universalData.data as String);
+      }
+    } else {
+      if (context.mounted) {
+        showMessage(context, universalData.error);
+      }
+    }
+  }
+
+  Stream<List<ChatModel>> getMessage() => FirebaseFirestore.instance
+      .collection("chat1")
+      .orderBy('createdAt')
+      .snapshots()
+      .map(
+        (event1) =>
+            event1.docs.map((doc) => ChatModel.fromJson(doc.data())).toList(),
+      );
 
   showMessage(BuildContext context, String error) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));

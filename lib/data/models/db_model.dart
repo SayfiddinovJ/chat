@@ -6,7 +6,7 @@ class DBModelFields {
   static const String message = "body";
   static const String createdAt = "createdAt";
 
-  static const String dbTable = "messages";
+  static const String dbTable = "chatTel";
 
 }
 

@@ -1,7 +1,7 @@
 import 'package:chat/data/models/chat_model.dart';
 import 'package:chat/providers/chat_provider.dart';
 import 'package:chat/providers/profile_provider.dart';
-import 'package:chat/ui/notifications/notifications_screen.dart';
+import 'package:chat/ui/chat/notifications/notifications_screen.dart';
 import 'package:chat/ui_utils/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -24,10 +24,25 @@ class _ChatScreenState extends State<ChatScreen> {
         title: const Text('Chat'),
         actions: [
           IconButton(
-            onPressed: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>const NotificationScreen()));
+            onPressed: () {
+              context.read<ChatProvider>().deleteAll(context: context);
             },
-            icon: const Icon(Icons.notifications,color: Colors.white,),
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const NotificationScreen()));
+            },
+            icon: const Icon(
+              Icons.notifications,
+              color: Colors.white,
+            ),
           ),
         ],
       ),
@@ -92,7 +107,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                               fontWeight: FontWeight.w700),
                                         ),
                                         SizedBox(height: 2.h),
-                                        Text(chatModel.massage),
+                                        Text(
+                                          chatModel.massage,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 5,
+                                        ),
                                       ],
                                     ),
                                   ),

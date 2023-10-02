@@ -1,4 +1,5 @@
 import 'package:chat/ui/chat/chat_screen.dart';
+import 'package:chat/ui/news/news_screen.dart';
 import 'package:chat/ui/profile/profile_screen.dart';
 import 'package:chat/ui/users/users_screen.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +49,16 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => const ChatScreen()));
+            },
+          ),
+          ListTile(
+            title: const Text(
+              'News',
+              style: TextStyle(fontSize: 20),
+            ),
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const NewsScreen()));
             },
           ),
         ],

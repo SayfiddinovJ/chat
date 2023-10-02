@@ -1,14 +1,15 @@
 import 'package:chat/data/models/db_model.dart';
+import 'package:chat/data/models/news_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-class LocalDatabase {
-  static final LocalDatabase getInstance = LocalDatabase._init();
+class NotLocalDatabase {
+  static final NotLocalDatabase getInstance = NotLocalDatabase._init();
   static String dataPath = '';
-  LocalDatabase._init();
+  NotLocalDatabase._init();
 
-  factory LocalDatabase() {
+  factory NotLocalDatabase() {
     return getInstance;
   }
 
@@ -18,7 +19,7 @@ class LocalDatabase {
     if (_database != null) {
       return _database!;
     } else {
-      _database = await _initDB("chat.db");
+      _database = await _initDB("notification.db");
       return _database!;
     }
   }
@@ -35,37 +36,37 @@ class LocalDatabase {
     const textType = "TEXT NOT NULL";
 
     await db.execute('''
-    CREATE TABLE ${DBModelFields.dbTable} (
-    ${DBModelFields.id} $idType,
-    ${DBModelFields.name} $textType,
-    ${DBModelFields.message} $textType,
-    ${DBModelFields.createdAt} $textType
+    CREATE TABLE ${NewsFields.dbTable} (
+    ${NewsFields.id} $idType,
+    ${NewsFields.title} $textType,
+    ${NewsFields.body} $textType,
+    ${NewsFields.createdAt} $textType
     )
     ''');
   }
 
-  static Future<DBModelSql> insertMessage(DBModelSql dbModelSql) async {
+  static Future<NewsModel> insertNotification(NewsModel newsModel) async {
     final db = await getInstance.database;
-    final int id = await db.insert(DBModelFields.dbTable, dbModelSql.toJson());
-    return dbModelSql.copyWith(id: id);
+    final int id = await db.insert(NewsFields.dbTable, newsModel.toJson());
+    return newsModel.copyWith(id: id);
   }
 
-  static Future<List<DBModelSql>> getAllMessages() async {
-    List<DBModelSql> allMessages = [];
+  static Future<List<NewsModel>> getAllNotifications() async {
+    List<NewsModel> allNotifications = [];
     final db = await getInstance.database;
-    allMessages = (await db.query(DBModelFields.dbTable))
-        .map((e) => DBModelSql.fromJson(e))
+    allNotifications = (await db.query(NewsFields.dbTable))
+        .map((e) => NewsModel.fromJson(e))
         .toList();
 
-    return allMessages;
+    return allNotifications;
   }
 
   static Future<void> deleteMessage(int id) async {
     final db = await getInstance.database;
     try{
       db.delete(
-        "chat",
-        where: "_id = ?",
+      NewsFields.dbTable,
+        where: "id = ?",
         whereArgs: [id],
       );
       debugPrint('delete message');

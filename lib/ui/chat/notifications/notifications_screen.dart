@@ -22,6 +22,7 @@ class _NotificationScreenState extends State<NotificationScreen>
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('NOTIFICATION LENGTH: ${context.watch<ReadProvider>().messages.length}');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notifications'),
@@ -48,6 +49,9 @@ class _NotificationScreenState extends State<NotificationScreen>
                   DBModelSql model =
                       context.watch<ReadProvider>().messages[index];
                   return ListTile(
+                    onTap: (){
+                      context.read<ReadProvider>().deleteMessage(model.id!);
+                    },
                     title: Text(model.name),
                     subtitle: Text(model.message),
                   );

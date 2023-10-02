@@ -1,26 +1,25 @@
 import 'package:chat/data/models/chat_model.dart';
+import 'package:chat/data/models/news_model.dart';
 import 'package:chat/data/models/universal_data.dart';
-import 'package:chat/providers/api_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ChatService {
-  static Future<UniversalData> addMessage(
-      {required ChatModel chatModel}) async {
+class NotificationService {
+  static Future<UniversalData> sendNotification(
+      {required NewsModel newsModel}) async {
     try {
-      await ApiProvider.sendMessage(
-          title: chatModel.userName, body: chatModel.massage);
-      DocumentReference newChat = await FirebaseFirestore.instance
-          .collection("chat1")
-          .add(chatModel.toJson());
+      await NotificationService.sendNotification(newsModel: newsModel);
+      DocumentReference newNotification = await FirebaseFirestore.instance
+          .collection("notification")
+          .add(newsModel.toJson());
 
       await FirebaseFirestore.instance
-          .collection("chat1")
-          .doc(newChat.id)
+          .collection("notification")
+          .doc(newNotification.id)
           .update({
-        "chatId": newChat.id,
+        "id": newNotification.id,
       });
 
-      return UniversalData(data: "Message added!");
+      return UniversalData(data: "Notification added!");
     } on FirebaseException catch (e) {
       return UniversalData(error: e.code);
     } catch (error) {
@@ -28,15 +27,15 @@ class ChatService {
     }
   }
 
-  static Future<UniversalData> updateMessage(
+  static Future<UniversalData> updateNotification(
       {required ChatModel chatModel}) async {
     try {
       await FirebaseFirestore.instance
-          .collection("chat1")
+          .collection("notification")
           .doc(chatModel.chatId)
           .update(chatModel.toJson());
 
-      return UniversalData(data: "Message updated!");
+      return UniversalData(data: "Notification updated!");
     } on FirebaseException catch (e) {
       return UniversalData(error: e.code);
     } catch (error) {
@@ -44,11 +43,11 @@ class ChatService {
     }
   }
 
-  static Future<UniversalData> deleteMessage({required String chatId}) async {
+  static Future<UniversalData> deleteNotification({required String chatId}) async {
     try {
-      await FirebaseFirestore.instance.collection("chat1").doc(chatId).delete();
+      await FirebaseFirestore.instance.collection("notification").doc(chatId).delete();
 
-      return UniversalData(data: "Message deleted!");
+      return UniversalData(data: "Notification deleted!");
     } on FirebaseException catch (e) {
       return UniversalData(error: e.code);
     } catch (error) {
@@ -58,12 +57,15 @@ class ChatService {
 
   static Future<UniversalData> deleteAll() async {
     try {
-      await FirebaseFirestore.instance.collection("chat1").get().then((querySnapshot) {
+      await FirebaseFirestore.instance
+          .collection("notification")
+          .get()
+          .then((querySnapshot) {
         for (var doc in querySnapshot.docs) {
           doc.reference.delete();
         }
       });
-      return UniversalData(data: "Messages deleted!");
+      return UniversalData(data: "Notification deleted!");
     } on FirebaseException catch (e) {
       return UniversalData(error: e.code);
     } catch (error) {
