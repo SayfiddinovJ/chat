@@ -78,6 +78,8 @@ class _NotificationScreenState extends State<NotificationScreen>
       case AppLifecycleState.detached:
         debugPrint('AppLifecycleState detached');
         break;
+      case AppLifecycleState.hidden:
+        // TODO: Handle this case.
     }
   }
 }
